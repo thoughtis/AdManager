@@ -130,6 +130,7 @@
             enabled:             true,               // Turn off ads
             insertionEnabled:    false,              // Enable dynamic insertion
             insertion:           {
+                usePrimary:      true,               // Distinguish between Primary and Secondary units
                 pxBetweenUnits:  800,                // Minimum space b/w dynamically inserted units
                 adHeightLimit:   1000,               // Max-height for dynamic units
                 insertExclusion: [                   // Skip these elements when inserting units
@@ -1326,6 +1327,10 @@
      * @todo  Clarify usage, make optional.
      */
     function insertPrimaryUnit() {
+
+        if ( ! Config.get( 'insertion.usePrimary' ) ) {
+            return;
+        }
 
         var unit = getPrimaryUnit(),
             tallest = Inventory.tallestAvailable( unit ),

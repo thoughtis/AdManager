@@ -245,6 +245,10 @@
      */
     function insertPrimaryUnit() {
 
+        if ( ! Config.get( 'insertion.usePrimary' ) ) {
+            return;
+        }
+
         var unit = getPrimaryUnit(),
             tallest = Inventory.tallestAvailable( unit ),
             shortest = Inventory.shortestAvailable( unit ),
