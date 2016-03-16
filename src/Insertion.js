@@ -240,10 +240,17 @@
 
     /**
      * Inserts the primary unit, which must display above the fold.
+     * For this to execute, insertion.usePrimary must equal true in the config.
      *
-     * @todo  Clarify usage, make optional.
+     * @todo  Clarify usage
      */
     function insertPrimaryUnit() {
+
+        if ( true !== Config.get( 'insertion.usePrimary' ) ) {
+
+            return;
+
+        }
 
         var unit = getPrimaryUnit(),
             tallest = Inventory.tallestAvailable( unit ),
