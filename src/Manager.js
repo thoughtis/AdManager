@@ -291,6 +291,18 @@
                          )
                         .addService( googletag.pubads() );
 
+                // Slot specific targeting via the prev_scp parameter
+
+                if ( 'targeting' in position && false === $.isEmptyObject( position.targeting ) ) {
+
+                     $.each( position.targeting, function ( key, value ) {
+
+                        slot.setTargeting( key, value );
+
+                    } );
+
+                }
+
                 definedSlots.push( slot );
 
             } );
