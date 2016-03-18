@@ -909,13 +909,13 @@
 
             } );
 
-            googletag.pubads().refresh( pageSlots );
-
             $.each( pagePositions, function ( index, slotName ) {
 
                 googletag.display( slotName );
 
             } );
+
+            googletag.pubads().refresh( pageSlots );
 
         } );
 
