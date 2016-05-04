@@ -365,7 +365,7 @@
 
             } );
 
-            googletag.pubads().refresh( pageSlots );
+            googletag.pubads().refresh( pageSlots, { changeCorrelator : false } );
 
         } );
 
