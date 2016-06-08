@@ -142,7 +142,6 @@
 
         if ( inContent ) {
             denoteValidInsertions();
-            insertPrimaryUnit();
             insertSecondaryUnits();
         }
 
@@ -239,49 +238,6 @@
     }
 
     /**
-     * Inserts the primary unit, which must display above the fold.
-     * For this to execute, insertion.usePrimary must equal true in the config.
-     *
-     * @todo  Clarify usage
-     */
-    function insertPrimaryUnit() {
-
-        if ( true !== Config.get( 'insertion.usePrimary' ) ) {
-
-            return;
-
-        }
-
-        var unit = getPrimaryUnit(),
-            tallest = Inventory.tallestAvailable( unit ),
-            shortest = Inventory.shortestAvailable( unit ),
-            location = findInsertionLocation( {
-                height: tallest,
-                limit: Config.get( 'insertion.adHeightLimit' )
-            } ),
-            markup = null
-        ;
-
-        if ( ! location ) {
-            location = findInsertionLocation( {
-                height: shortest,
-                limit: Config.get( 'insertion.adHeightLimit' ),
-                force: true
-            } );
-
-            if ( ! location.disableFloat ) {
-                // unset large sizes
-                unit = Inventory.limitUnitHeight( unit, shortest );
-            }
-        }
-
-        markup = adUnitMarkup( unit.slot, location.disableFloat );
-
-        location.$insertBefore.before( markup );
-
-    }
-
-    /**
      * Inserts the secondary units, which can appear below the fold.
      */
     function insertSecondaryUnits() {
@@ -290,7 +246,7 @@
 
             var tallest = Inventory.tallestAvailable( unit ),
                 location = findInsertionLocation( {
-                    height: tallest
+                    height: tallest + Config.get( 'insertion.pxBetweenUnits ' )
                 } ),
                 markup = null
             ;
@@ -303,35 +259,6 @@
             location.$insertBefore.before( markup );
 
         } );
-
-    }
-
-    /**
-     * Determines the primary unit, which is either denoted or the first listed.
-     *
-     * @todo   Use `$.grep` instead of `$.each` for optimization.
-     * @return {Object|Boolean} primaryUnit False on failure.
-     */
-    function getPrimaryUnit() {
-
-        var primaryUnit = false;
-
-        $.each( inventory, function ( index, unit ) {
-
-            if ( unit.primary ) {
-                primaryUnit = unit;
-                inventory = Util.removeByKey( inventory, index );
-                return false;
-            }
-
-        } );
-
-        if ( ! primaryUnit ) {
-            primaryUnit = inventory[0];
-            inventory = Util.removeByKey( inventory, 0 );
-        }
-
-        return primaryUnit;
 
     }
 
@@ -446,8 +373,7 @@
      */
     NodeSearch.prototype.verifyNode = function ( index, $node ) {
 
-        var since = $node.offset().top - this.lastPosition,
-            height = $node.outerHeight(),
+        var height = $node.outerHeight(),
             isLast = ( this.$nodes.length - 1 ) === index;
 
         this.totalHeight += height;
@@ -474,13 +400,6 @@
             }
 
             if ( this.validHeight >= this.neededheight ) {
-
-                if ( ! this.limit && ( since < Config.get( 'insertion.pxBetweenUnits' ) ) ) {
-
-                    this.validHeight = 0;
-                    this.$insertBefore = null;
-
-                }
 
                 this.locationFound = true;
                 this.exitLoop = true;
