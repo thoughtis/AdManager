@@ -1340,7 +1340,7 @@
 
             var tallest = Inventory.tallestAvailable( unit ),
                 location = findInsertionLocation( {
-                    height: tallest + Config.get( 'insertion.pxBetweenUnits ' )
+                    height: tallest + Config.get( 'insertion.pxBetweenUnits' )
                 } ),
                 markup = null
             ;
