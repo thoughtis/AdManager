@@ -91,23 +91,18 @@
 
         var width = window.innerWidth > 0 ? window.innerWidth : screen.width;
 
-        if ( width > 1024 ) {
+        if ( width > 1100 ) {
             return inventory;
         }
 
-        if ( width >= 768 && width <= 1024 ) {
-
-            var max = 980;
-
-            for ( var i = 0; i < inventory.length; i++ ) {
-                var sizesToRemove = [];
-                for ( var j = 0; j < inventory[ i ].sizes.length; j++ ) {
-                    if ( inventory[ i ].sizes[ j ][0] > max ) {
-                        sizesToRemove.push( inventory[ i ].sizes[ j ] );
-                    }
+        for ( var i = 0; i < inventory.length; i++ ) {
+            var sizesToRemove = [];
+            for ( var j = 0; j < inventory[ i ].sizes.length; j++ ) {
+                if ( inventory[ i ].sizes[ j ][0] > width ) {
+                    sizesToRemove.push( inventory[ i ].sizes[ j ] );
                 }
-                inventory[ i ].sizes = Util.difference( inventory[ i ].sizes, sizesToRemove );
             }
+            inventory[ i ].sizes = Util.difference( inventory[ i ].sizes, sizesToRemove );
         }
 
         return inventory;
