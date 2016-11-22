@@ -332,7 +332,7 @@
         this.limit = options.limit;
         this.$nodes = options.$nodes;
         this.lastPosition = 0;
-        this.neededheight = options.height - this.marginDifference;
+        this.neededheight = options.height + this.marginDifference;
 
     }
 
@@ -373,7 +373,8 @@
      */
     NodeSearch.prototype.verifyNode = function ( index, $node ) {
 
-        var height = $node.outerHeight(),
+        // Avg outerHeight to negate overlapping margins
+        var height = ( ( $node.outerHeight( true ) + $node.outerHeight() ) / 2 ),
             isLast = ( this.$nodes.length - 1 ) === index;
 
         this.totalHeight += height;
