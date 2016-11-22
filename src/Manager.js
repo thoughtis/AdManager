@@ -349,6 +349,9 @@
      */
     function displayPageAds() {
 
+        // Set additional targeting from Header Bidding
+        $.event.trigger( 'AdManager:headerBidding' );
+
         googletag.cmd.push( function () {
 
             var pageSlots = $.grep( definedSlots, function ( slot, index ) {
