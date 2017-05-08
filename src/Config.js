@@ -45,6 +45,7 @@
             insertion:           {
                 pxBetweenUnits:  0,                  // Additional space b/w dynamically inserted units
                 adHeightLimit:   1000,               // Max-height for dynamic units
+                uniqueClass : '',                    // Add a site-specific class to inserted units
                 insertExclusion: [                   // Skip these elements when inserting units
                     'img',
                     'iframe',
