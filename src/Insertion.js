@@ -214,11 +214,16 @@
 
         var type = Inventory.getUnitType( slotName ),
             alignment = odd ? 'odd' : 'even',
-            $html = $( '<div />' );
+            $html = $( '<div />' ),
+            uniqueClass = Config.get( 'insertion.uniqueClass' );
 
         $html
             .attr( 'data-ad-unit', slotName )
             .attr( 'data-client-type', type );
+
+        if ( 'string' == typeof uniqueClass && '' !== uniqueClass ) {
+            $html.addClass( uniqueClass );
+        }
 
         if ( disableFloat ) {
             $html

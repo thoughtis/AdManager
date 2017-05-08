@@ -132,6 +132,7 @@
             insertion:           {
                 pxBetweenUnits:  0,                  // Additional space b/w dynamically inserted units
                 adHeightLimit:   1000,               // Max-height for dynamic units
+                uniqueClass : '',                    // Add a site-specific class to inserted units
                 insertExclusion: [                   // Skip these elements when inserting units
                     'img',
                     'iframe',
@@ -1306,11 +1307,16 @@
 
         var type = Inventory.getUnitType( slotName ),
             alignment = odd ? 'odd' : 'even',
-            $html = $( '<div />' );
+            $html = $( '<div />' ),
+            uniqueClass = Config.get( 'insertion.uniqueClass' );
 
         $html
             .attr( 'data-ad-unit', slotName )
             .attr( 'data-client-type', type );
+
+        if ( 'string' == typeof uniqueClass && '' !== uniqueClass ) {
+            $html.addClass( uniqueClass );
+        }
 
         if ( disableFloat ) {
             $html
