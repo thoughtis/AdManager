@@ -1288,7 +1288,7 @@
      */
     function isValidInsertionLocation( $element ) {
 
-        return $.parseJSON( $element.data( 'valid-location' ) );
+        return JSON.parse( $element.data( 'valid-location' ) );
 
     }
 
@@ -1298,37 +1298,21 @@
      *
      * @see    https://vip.wordpress.com/2015/03/25/preventing-xss-in-javascript/
      * @param  {String}  slotName
-     * @param  {Boolean} disableFloat
      * @return {Array}   $html
      */
-    function adUnitMarkup( slotName, disableFloat ) {
+    function adUnitMarkup( slotName ) {
 
-        disableFloat = disableFloat || false;
-
-        var type = Inventory.getUnitType( slotName ),
-            alignment = odd ? 'odd' : 'even',
-            $html = $( '<div />' ),
+        var type        = Inventory.getUnitType( slotName ),
+            $html       = $( '<div />' ),
             uniqueClass = Config.get( 'insertion.uniqueClass' );
 
         $html
             .attr( 'data-ad-unit', slotName )
-            .attr( 'data-client-type', type );
+            .attr( 'data-client-type', type )
+            .addClass( 'in-content' );
 
         if ( 'string' == typeof uniqueClass && '' !== uniqueClass ) {
             $html.addClass( uniqueClass );
-        }
-
-        if ( disableFloat ) {
-            $html
-                .addClass( 'disable-float' );
-        } else {
-            $html
-                .addClass( 'in-content' )
-                .addClass( alignment );
-        }
-
-        if ( ! disableFloat ) {
-            odd = ! odd;
         }
 
         return $html;
@@ -1340,20 +1324,24 @@
      */
     function insertSecondaryUnits() {
 
+        var pxBetweenUnits = Config.get( 'insertion.pxBetweenUnits' );
+
         $.each( inventory, function ( index, unit ) {
 
-            var tallest = Inventory.tallestAvailable( unit ),
+            var tallest  = Inventory.tallestAvailable( unit ),
+                force    = ( 0 === index ),
                 location = findInsertionLocation( {
-                    height: tallest + Config.get( 'insertion.pxBetweenUnits' )
-                } ),
-                markup = null
+                    height: tallest + pxBetweenUnits,
+                    force: force
+                })
             ;
 
             if ( ! location ) {
                 return false;
             }
 
-            markup = adUnitMarkup( unit.slot, location.disableFloat );
+            var markup = adUnitMarkup( unit.slot );
+
             location.$insertBefore.before( markup );
 
         } );
@@ -1374,38 +1362,26 @@
 
         options = options || {};
 
-        var $nodes = getNodes(),
-            nodeSearch = new NodeSearch( {
-                $nodes: $nodes,
-                force: options.force ? options.force : false,
-                limit: options.limit ? options.limit : false,
-                height: options.height
-            } )
-        ;
+        var $nodes = getNodes();
 
         if ( ! $nodes.length ) {
             return false;
         }
 
-        // Loop through each node as necessary.
-        // `verifyNode()` returns true when found.
-        // Break the loop when true.
-        $.each( $nodes, function ( i, node ) {
-
-            return true !== nodeSearch.verifyNode( i, $( node ) ) ? true : false;
-
+        var nodeSearch = new NodeSearch( {
+            $nodes: $nodes,
+            force: options.force,
+            height: options.height
         } );
+
+        nodeSearch.findLocation();
 
         if ( ! nodeSearch.locationFound ) {
             return false;
         }
 
-        nodeSearch.markValidNodes();
-        nodeSearch.setLastPosition();
-
         return {
-            '$insertBefore': nodeSearch.$insertBefore,
-            'disableFloat': nodeSearch.disableFloat
+            '$insertBefore': nodeSearch.$insertBefore
         };
 
     }
@@ -1417,39 +1393,44 @@
      */
     function NodeSearch( options ) {
 
-        this.totalHeight = 0;
-        this.marginDifference = 40;
+        this.$nodes = options.$nodes;
+        this.validHeight = 0;
+        this.marginDifference = 64;
         this.inserted = [];
         this.$insertBefore = null;
-        this.disableFloat = false;
         this.locationFound = false;
-        this.validHeight = 0;
         this.exitLoop = false;
         this.height = options.height;
         this.force = options.force;
-        this.limit = options.limit;
-        this.$nodes = options.$nodes;
-        this.lastPosition = 0;
-        this.neededheight = options.height + this.marginDifference;
+        this.neededHeight = options.height + this.marginDifference;
+        this.adUnitIndex = options.adUnitIndex;
 
     }
 
-    /**
-     * Store the position of the last ad.
-     */
-    NodeSearch.prototype.setLastPosition = function () {
+    NodeSearch.prototype.findLocation = function() {
 
-        this.lastPosition = this.$insertBefore.offset().top + this.neededheight;
+        var self = this;
+
+        // Loop through each node as necessary.
+        // `verifyNode()` returns true when found.
+        // Break the loop when true.
+        $.each( self.$nodes, function ( i, node ) {
+
+            return true !== self.verifyNode( i, $( node ) ) ? true : false;
+
+        } );
+
+        self.invalidateUsedNodes();
 
     };
 
     /**
-     * Mark nodes where insertion is valid.
+     * Nodes next to an ad are no longer valid locations
      *
      * @todo  Consistently use `.attr()` or `.data()` when setting.
      *        jQuery does not need the DOM to change for data attributes.
      */
-    NodeSearch.prototype.markValidNodes = function () {
+    NodeSearch.prototype.invalidateUsedNodes = function () {
 
         if ( ! this.inserted.length ) {
             return;
@@ -1464,52 +1445,34 @@
     /**
      * Verify each node to find a suitable insertion point.
      *
-     * @todo   Why is `this.exitLoop` set to `null`?
-     * @todo   Document each step. Simplify if possible.
-     *
      * @return {Boolean}
      */
     NodeSearch.prototype.verifyNode = function ( index, $node ) {
 
         // Avg outerHeight to negate overlapping margins
         var height = ( ( $node.outerHeight( true ) + $node.outerHeight() ) / 2 ),
-            isLast = ( this.$nodes.length - 1 ) === index;
+            isLastNode = this.$nodes.length === index + 1;
 
-        this.totalHeight += height;
+        if ( isValidInsertionLocation( $node ) ) {
 
-        if ( this.force && ( this.totalHeight >= this.limit || isLast ) ) {
-
-            this.$insertBefore = $node;
-            this.disableFloat = true;
-            this.locationFound = true;
-            this.exitLoop = true;
-
-        } else if ( this.limit && ( this.totalHeight >= this.limit || isLast ) ) {
-
-            this.locationFound = false;
-            this.exitLoop = true;
-
-        } else if ( isValidInsertionLocation( $node ) ) {
-
+            // Valid, so increment height
             this.validHeight += height;
             this.inserted.push( $node );
 
-            if ( this.$insertBefore === null ) {
-                this.$insertBefore = $node;
-            }
-
-            if ( this.validHeight >= this.neededheight ) {
-
-                this.locationFound = true;
-                this.exitLoop = true;
-
-            }
-
         } else {
 
+            // Reset Height When You Hit Something Invalid
             this.validHeight = 0;
-            this.$insertBefore = null;
-            this.exitLoop = null;
+            this.inserted = [];
+
+        }
+
+        if ( this.validHeight >= this.neededHeight || ( this.force && isLastNode ) ) {
+
+            // Insert ad before the first valid node
+            this.$insertBefore  = this.inserted[0];
+            this.locationFound  = true;
+            this.exitLoop       = true;
 
         }
 
