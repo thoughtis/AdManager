@@ -1248,7 +1248,6 @@
      *
      * @todo  Potentially use `$.grep` to filter nodes for faster parsing.
      * @todo  Use `for` loop or `$.grep` to check for excluded elements.
-     * @todo  Clarify `$prev` check.
      */
     function denoteValidInsertions() {
 
@@ -1259,7 +1258,6 @@
         $nodes.each( function ( i ) {
 
             var $element = $( this ),
-                $prev = i > 0 ? $nodes.eq( i - 1 ) : false,
                 valid = true
             ;
 
@@ -1269,10 +1267,6 @@
                     return false; // break loop
                 }
             } );
-
-            if ( $prev && $prev.is( 'p' ) && $prev.find( 'img' ).length === 1 ) {
-                valid = false;
-            }
 
             $element.attr( 'data-valid-location', valid );
 
@@ -1469,10 +1463,15 @@
 
         if ( this.validHeight >= this.neededHeight || ( this.force && isLastNode ) ) {
 
-            // Insert ad before the first valid node
-            this.$insertBefore  = this.inserted[0];
-            this.locationFound  = true;
-            this.exitLoop       = true;
+            this.exitLoop = true;
+
+            if ( 0 < this.inserted.length ) {
+
+                 // Insert ad before the first valid node
+                this.$insertBefore  = this.inserted[0];
+                this.locationFound  = true;
+
+            }
 
         }
 
