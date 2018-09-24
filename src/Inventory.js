@@ -140,18 +140,18 @@
     }
 
     /**
-     * Get info about an ad unit by slot name.
+     * Get info about an ad unit by slot ID.
      *
-     * @param  {String} slotName
+     * @param  {String} slotId
      * @return {Object} adInfo
      */
-    function getAdInfo( slotName ) {
+    function getAdInfo( slotId ) {
 
         var adInfo = {},
             inventory = getInventory();
 
         for ( var i = 0; i < inventory.length; i++ ) {
-            if ( inventory[ i ].slot !== slotName ) {
+            if ( inventory[ i ].id !== slotId ) {
                 continue;
             }
 
@@ -237,16 +237,16 @@
      * Finds the unit by slot name and returns its type.
      * Type is used to filter the inventory (like desktop and mobile).
      *
-     * @param  {String} slotName
+     * @param  {String} slotId
      * @return {String} type
      */
-    function getUnitType( slotName ) {
+    function getUnitType( slotId ) {
 
         var type = 'default';
 
         $.each( getInventory(), function ( index, unit ) {
 
-            if ( unit.slot !== slotName ) {
+            if ( unit.slot !== slotId ) {
                 return true;
             }
 
