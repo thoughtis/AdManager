@@ -246,7 +246,7 @@
         $units = $context.find( selector );
 
         $units.each( function () {
-            pagePositions.push( $( this ).data( 'ad-unit' ) );
+            pagePositions.push( $( this ).data( 'ad-id' ) );
         } );
 
     }
@@ -263,15 +263,18 @@
             var undefinedPagePositions = [];
 
             if ( $.isEmptyObject( definedSlots ) ) {
+
                 undefinedPagePositions = pagePositions;
+
             } else {
-                var definedSlotNames = $.map( definedSlots, function ( slot, index ) {
-                    return convertSlotName( slot.getAdUnitPath(), 'local' );
+
+                var definedSlotIds = $.map( definedSlots, function ( slot, index ) {
+                    return slot.getSlotElementId();
                 } );
 
-                undefinedPagePositions = $.grep( pagePositions, function ( slotName, index ) {
+                undefinedPagePositions = $.grep( pagePositions, function ( slotId, index ) {
 
-                    if ( $.inArray( slotName, definedSlotNames ) !== -1 ) {
+                    if ( $.inArray( slotId, definedSlotIds ) !== -1 ) {
                         return false;
                     }
 
@@ -280,16 +283,13 @@
                 } );
             }
 
-            $.each( undefinedPagePositions, function ( index, slotName ) {
+            $.each( undefinedPagePositions, function ( index, slotId ) {
 
-                var position = Inventory.getAdInfo( slotName ),
-                    slot = googletag
-                        .defineSlot(
-                            convertSlotName( slotName, 'dfp' ),
-                            position.sizes,
-                            position.slot
-                         )
-                        .addService( googletag.pubads() );
+                var position = Inventory.getAdInfo( slotId ),
+                    slotName = convertSlotName( position.slot, 'dfp' ),
+                    slot     = googletag.defineSlot( slotName, position.sizes, position.id );
+
+                slot.addService( googletag.pubads() );
 
                 // Slot specific targeting via the prev_scp parameter
 
@@ -327,16 +327,16 @@
         var $context = $( Config.get( 'context' ) ),
             notInserted = [];
 
-        notInserted = $.grep( pagePositions, function ( slotName, index ) {
-            return document.getElementById( slotName ) === null;
+        notInserted = $.grep( pagePositions, function ( slotId, index ) {
+            return document.getElementById( slotId ) === null;
         } );
 
-        $.each( notInserted, function ( index, slotName ) {
+        $.each( notInserted, function ( index, slotId ) {
 
-            $context.find( '[data-ad-unit="' + slotName + '"]' )
+            $context.find( '[data-ad-id="' + slotId + '"]' )
                 .addClass( 'is-initialized' )
                 .append( $( '<div />', {
-                    id: slotName,
+                    id: slotId,
                     addClass: 'ad-unit-target'
                 } ) );
 
@@ -356,15 +356,15 @@
 
             var pageSlots = $.grep( definedSlots, function ( slot, index ) {
 
-                var slotName = convertSlotName( slot.getAdUnitPath(), 'local' );
+                var slotId = slot.getSlotElementId();
 
-                return -1 !== $.inArray( slotName, pagePositions );
+                return -1 !== $.inArray( slotId, pagePositions );
 
             } );
 
-            $.each( pagePositions, function ( index, slotName ) {
+            $.each( pagePositions, function ( index, slotId ) {
 
-                googletag.display( slotName );
+                googletag.display( slotId );
 
             } );
 
@@ -402,16 +402,16 @@
      *
      * @todo   Use `$.grep` instead of `$.each`.
      *
-     * @param  {String} slotName
+     * @param  {String} slotId
      * @return {Object} definedSlot
      */
-    function getDefinedSlot( slotName ) {
+    function getDefinedSlot( slotId ) {
 
         var definedSlot = null;
 
         $.each( definedSlots, function ( i, slot ) {
-            var unitName = convertSlotName( slot.getAdUnitPath(), 'local' );
-            if ( unitName === slotName ) {
+            var unitId = slot.getSlotElementId();
+            if ( unitId === slotId ) {
                 definedSlot = slot;
                 return false;
             }
@@ -425,19 +425,19 @@
      * Display slot by ID or slot.
      * Separate display call from `displayPageAds()`.
      *
-     * @param {String} slotName
+     * @param {String} slotId
      */
-    function displaySlot( slotName ) {
+    function displaySlot( slotId ) {
 
         googletag.cmd.push( function () {
 
-            var slot = getDefinedSlot( slotName );
+            var slot = getDefinedSlot( slotId );
 
+            googletag.display( slotId );
             googletag.pubads().refresh( [ slot ] );
-            googletag.display( slotName );
 
             pagePositions = $.grep( pagePositions, function ( pagePosition, index ) {
-                return slotName !== pagePosition;
+                return slotId !== pagePosition;
             } );
 
         } );
@@ -448,18 +448,18 @@
      * Empty slots by name. Removes their target container,
      *
      * @param  {Object} event
-     * @param  {Array}  units List of slot names.
+     * @param  {Array}  units List of slot Ids.
      */
-    function emptySlots( event, units ) {
 
-        units = $.map( units, function ( unit, index ) {
-            return convertSlotName( unit, 'dfp' );
+    function emptySlots( event, unitIds ) {
+
+        var units = $.map( unitIds, function ( id, index ) {
+            return getDefinedSlot( id );
         } );
 
         googletag.pubads().clear( units );
 
-        $.each( units, function ( index, unit ) {
-            var id = convertSlotName( unit, 'local' );
+        $.each( unitIds, function ( index, id ) {
             $( document.getElementById( id ) ).remove();
         } );
 
@@ -481,21 +481,18 @@
             removeContainer: true
         }, options );
 
-        var units = $.map( options.$context.find( adSelector ), function ( unit, index ) {
-            return convertSlotName( $( unit ).data( 'ad-unit' ), 'dfp' );
+        var containers = options.$context.find( adSelector );
+
+        var units = $.map( containers, function ( unit, index ) {
+            return getDefinedSlot( $( unit ).data( 'ad-id' ) );
         } );
 
         googletag.pubads().clear( units );
 
-        var elements = $.map( units, function ( unit, index ) {
-            var id = convertSlotName( unit, 'local' );
-            return options.$context.find( '#' + id );
-        } );
-
         if ( options.removeContainer ) {
-            $( elements ).remove();
+            $( containers ).remove();
         } else {
-            $( elements ).empty();
+            $( containers ).empty();
         }
 
     }

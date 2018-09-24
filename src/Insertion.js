@@ -198,18 +198,19 @@
      * Creates DOM node to attach to the DOM.
      *
      * @see    https://vip.wordpress.com/2015/03/25/preventing-xss-in-javascript/
-     * @param  {String}  slotName
+     * @param  {String}  slotId
      * @return {Array}   $html
      */
-    function adUnitMarkup( slotName ) {
+    function adUnitMarkup( slotId ) {
 
-        var type        = Inventory.getUnitType( slotName ),
+        var adInfo      = Inventory.getAdInfo( slotId ),
             $html       = $( '<div />' ),
             uniqueClass = Config.get( 'insertion.uniqueClass' );
 
         $html
-            .attr( 'data-ad-unit', slotName )
-            .attr( 'data-client-type', type )
+            .attr( 'data-ad-id', adInfo.id )
+            .attr( 'data-ad-unit', adInfo.slot )
+            .attr( 'data-client-type', adInfo.type )
             .addClass( 'in-content' );
 
         if ( 'string' == typeof uniqueClass && '' !== uniqueClass ) {
@@ -241,7 +242,7 @@
                 return false;
             }
 
-            var markup = adUnitMarkup( unit.slot );
+            var markup = adUnitMarkup( unit.id );
 
             location.$insertBefore.before( markup );
 
