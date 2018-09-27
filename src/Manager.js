@@ -139,7 +139,7 @@
         window.googletag.cmd = window.googletag.cmd || [];
 
         // Called when GPT is Available
-        googletag.cmd.push( onLibraryLoaded )
+        window.googletag.cmd.push( onLibraryLoaded )
 
         gads = document.createElement( 'script' );
         gads.async = true;
