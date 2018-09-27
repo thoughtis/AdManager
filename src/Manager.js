@@ -138,22 +138,14 @@
         window.googletag = window.googletag || {};
         window.googletag.cmd = window.googletag.cmd || [];
 
+        // Called when GPT is Available
+        googletag.cmd.push( onLibraryLoaded )
+
         gads = document.createElement( 'script' );
         gads.async = true;
         gads.type = 'text/javascript';
-        useSSL = 'https:' == document.location.protocol;
-        gads.src = ( useSSL ? 'https:' : 'http:' ) + '//www.googletagservices.com/tag/js/gpt.js';
-        if ( gads.addEventListener ) {
-            gads.addEventListener( 'load', onLibraryLoaded, false );
-        } else if ( gads.readyState ) {
-            gads.onreadystatechange = function () {
-                // Legacy IE
-                if ( ! readyStateLoaded ) {
-                    readyStateLoaded = true;
-                    onLibraryLoaded();
-                }
-            };
-        }
+        gads.src = 'https://www.googletagservices.com/tag/js/gpt.js';
+
         node = document.getElementsByTagName( 'script' )[0];
         node.parentNode.insertBefore( gads, node );
 
@@ -235,19 +227,25 @@
 
         var clientType = Config.get( 'clientType' ),
             $context = $( Config.get( 'context' ) ),
-            $units = null,
-            selector = adSelector + ':not(.is-disabled)'
+            selector = adSelector;
         ;
 
         if ( clientType !== false ) {
             selector += '[data-client-type="' + clientType + '"]';
         }
 
-        $units = $context.find( selector );
+        selector += ':not(.is-disabled)';
 
-        $units.each( function () {
-            pagePositions.push( $( this ).data( 'ad-id' ) );
-        } );
+        $context.find( selector ).each( function () {
+
+            var id = $( this ).data( 'ad-id' );
+            var adInfo = Inventory.getAdInfo( id );
+
+            if ( 'id' in adInfo ) {
+                pagePositions.push( id );
+            }
+
+        });
 
     }
 
@@ -369,6 +367,8 @@
             } );
 
             googletag.pubads().refresh( pageSlots, { changeCorrelator : false } );
+
+            $.event.trigger( 'AdManager:requestSent' );
 
         } );
 
