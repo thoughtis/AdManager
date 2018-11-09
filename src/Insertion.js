@@ -86,8 +86,8 @@
 
         var inventoryData = Inventory.getDynamicInventory();
 
-        inventory = inventory.length ? inventory : inventoryData.dynamicItems;
-        localContext = localContext ? localContext : inventoryData.localContext;
+        inventory = inventoryData.dynamicItems;
+        localContext = inventoryData.localContext;
 
         // No dynamic inventory.
         if ( ! inventory.length ) {
