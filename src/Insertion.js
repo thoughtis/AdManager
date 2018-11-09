@@ -107,11 +107,7 @@
             return broadcast();
         }
 
-        // console.log('Inserting ad units with this inventory.', inventory)
-
         insertAdUnits();
-
-        // console.log('done inserting ad units.')
 
     }
 
