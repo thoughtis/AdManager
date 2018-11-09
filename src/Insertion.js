@@ -86,8 +86,8 @@
 
         var inventoryData = Inventory.getDynamicInventory();
 
-        inventory = inventory.length ? inventory : inventoryData.dynamicItems;
-        localContext = localContext ? localContext : inventoryData.localContext;
+        inventory = inventoryData.dynamicItems;
+        localContext = inventoryData.localContext;
 
         // No dynamic inventory.
         if ( ! inventory.length ) {
@@ -107,7 +107,11 @@
             return broadcast();
         }
 
+        // console.log('Inserting ad units with this inventory.', inventory)
+
         insertAdUnits();
+
+        // console.log('done inserting ad units.')
 
     }
 

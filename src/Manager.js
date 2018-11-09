@@ -387,6 +387,7 @@
         var slotName = convertSlotName( unit.slot.getAdUnitPath(), 'local' );
 
         $.event.trigger( 'AdManager:adUnitRendered', {
+            id:          unit.slot.getSlotElementId(),
             name:        slotName,
             size:        unit.size,
             isEmpty:     unit.isEmpty,
