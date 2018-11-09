@@ -4,7 +4,8 @@
  * @author Athletics - http://athleticsnyc.com
  * @see https://github.com/athletics/AdManager
  * @version 0.6.4
- *//**
+ */
+/**
  * Shared utilities for debugging and array manipulation.
  */
 ( function ( window, factory ) {
@@ -684,7 +685,7 @@
         window.googletag.cmd = window.googletag.cmd || [];
 
         // Called when GPT is Available
-        googletag.cmd.push( onLibraryLoaded )
+        window.googletag.cmd.push( onLibraryLoaded )
 
         gads = document.createElement( 'script' );
         gads.async = true;
@@ -932,6 +933,7 @@
         var slotName = convertSlotName( unit.slot.getAdUnitPath(), 'local' );
 
         $.event.trigger( 'AdManager:adUnitRendered', {
+            id:          unit.slot.getSlotElementId(),
             name:        slotName,
             size:        unit.size,
             isEmpty:     unit.isEmpty,
@@ -1176,8 +1178,8 @@
 
         var inventoryData = Inventory.getDynamicInventory();
 
-        inventory = inventory.length ? inventory : inventoryData.dynamicItems;
-        localContext = localContext ? localContext : inventoryData.localContext;
+        inventory = inventoryData.dynamicItems;
+        localContext = inventoryData.localContext;
 
         // No dynamic inventory.
         if ( ! inventory.length ) {
@@ -1197,7 +1199,11 @@
             return broadcast();
         }
 
+        // console.log('Inserting ad units with this inventory.', inventory)
+
         insertAdUnits();
+
+        // console.log('done inserting ad units.')
 
     }
 
