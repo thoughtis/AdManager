@@ -526,6 +526,11 @@
 
         units = units || definedSlots;
 
+        // Convert element IDs to googletag slot references
+        units = $.map( units, function ( unit ) {
+            return 'string' === typeof unit ? getDefinedSlot( unit ) : unit;
+        } );
+
         googletag.cmd.push( function () {
             googletag.pubads().refresh( units );
         } );
