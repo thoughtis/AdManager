@@ -623,6 +623,7 @@
             .on( 'AdManager:runSequence', runSequence )
             .on( 'AdManager:slotsDefined', displayPageAds )
             .on( 'AdManager:refresh', refresh )
+            .on( 'AdManager:updateSizeMapping', updateSizeMapping )
             .on( 'AdManager:emptySlots', emptySlots )
             .on( 'AdManager:emptySlotsInContext', emptySlotsInContext );
 
@@ -1083,6 +1084,31 @@
 
     }
 
+    /**
+     * Updates the size mapping for a slot.
+     *
+     * @param  {Object} event
+     * @param  {String} slotId
+     * @param  {Array}  sizeMappings    array of sizes
+     */
+    function updateSizeMapping( event, slotId, sizeMappings ) {
+
+        var mapping;
+
+        var slot = getDefinedSlot( slotId );
+
+        if ( ! slot ) {
+            return;
+        }
+
+        mapping = googletag.sizeMapping()
+          .addSize( [ 0, 0 ], sizeMappings )
+          .build();
+
+        slot.defineSizeMapping( mapping );
+
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     return {
@@ -1091,6 +1117,7 @@
         runSequence:         runSequence,
         emptySlots:          emptySlots,
         emptySlotsInContext: emptySlotsInContext,
+        updateSizeMapping:   updateSizeMapping,
         refresh:             refresh
     };
 
