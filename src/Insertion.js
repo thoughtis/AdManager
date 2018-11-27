@@ -169,6 +169,9 @@
             ;
 
             $.each( excluded, function ( index, item ) {
+                if ( $element.is( '[data-insertion-ignore]' ) ) {
+                    return true;
+                }
                 if ( $element.is( item ) || $element.find( item ).length ) {
                     valid = false; // not valid
                     return false; // break loop
