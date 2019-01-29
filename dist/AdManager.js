@@ -624,7 +624,8 @@
             .on( 'AdManager:slotsDefined', displayPageAds )
             .on( 'AdManager:refresh', refresh )
             .on( 'AdManager:emptySlots', emptySlots )
-            .on( 'AdManager:emptySlotsInContext', emptySlotsInContext );
+            .on( 'AdManager:emptySlotsInContext', emptySlotsInContext )
+            .on( 'AdManager:clearTargeting', clearTargeting );
 
     }
 
@@ -744,8 +745,6 @@
 
     /**
      * Send key-value targeting in ad request.
-     *
-     * @todo  https://developers.google.com/doubleclick-gpt/reference#googletag.PubAdsService_clearTargeting
      */
     function setTargeting() {
 
@@ -762,6 +761,15 @@
             } );
 
         } );
+
+    }
+
+    /**
+     * Clear all key-value targeting values.
+     */
+    function clearTargeting() {
+
+        googletag.pubads().clearTargeting();
 
     }
 
@@ -1034,7 +1042,7 @@
             return getDefinedSlot( $( unit ).data( 'ad-id' ) );
         } );
 
-        googletag.pubads().clear( units );
+        googletag.destroySlots( units );
 
         if ( options.removeContainer ) {
             $( containers ).remove();
