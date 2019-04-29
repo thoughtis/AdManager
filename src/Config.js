@@ -41,6 +41,12 @@
             clientType:          false,              // Used to filter inventory
             context:             'body',             // Selector for ad filling container
             enabled:             true,               // Turn off ads
+            lazy:                false,              // Lazy-load ads
+            lazyConfig:          {
+                fetchMarginPercent:  300,
+                renderMarginPercent: 150,
+                mobileScaling:       2.0
+            },
             insertionEnabled:    false,              // Enable dynamic insertion
             insertion:           {
                 pxBetweenUnits:  0,                  // Additional space b/w dynamically inserted units

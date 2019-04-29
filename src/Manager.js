@@ -192,6 +192,11 @@
 
             // https://developers.google.com/doubleclick-gpt/reference#googletag.PubAdsService_disableInitialLoad
             googletag.pubads().disableInitialLoad();
+            
+            // https://developers.google.com/doubleclick-gpt/reference#googletag.PubAdsService_enableLazyLoad
+            if ( true === Config.get( 'lazy' ) ) {
+                googletag.pubads().enableLazyLoad( Config.get( 'lazyConfig' ) );
+            }
 
         } );
 
