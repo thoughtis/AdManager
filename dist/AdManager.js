@@ -150,6 +150,7 @@
                     '[data-ad-unit]'
                 ]
             },
+            usePlaceholders: false,                  // Insert blank placeholders instead of banner ads
             inventory: [],                           // Inventory of ad units
             targeting: []                            // Key value pairs to send with DFP request
         };
@@ -846,32 +847,36 @@
                 } );
             }
 
-            $.each( undefinedPagePositions, function ( index, slotId ) {
+            if ( true !== Config.get( 'usePlaceholders' ) ) {
 
-                var position = Inventory.getAdInfo( slotId ),
-                    slotName = convertSlotName( position.slot, 'dfp' ),
-                    slot     = googletag.defineSlot( slotName, position.sizes, position.id );
+                $.each( undefinedPagePositions, function ( index, slotId ) {
 
-                slot.addService( googletag.pubads() );
+                    var position = Inventory.getAdInfo( slotId ),
+                        slotName = convertSlotName( position.slot, 'dfp' ),
+                        slot     = googletag.defineSlot( slotName, position.sizes, position.id );
 
-                // Slot specific targeting via the prev_scp parameter
+                    slot.addService( googletag.pubads() );
 
-                if ( 'targeting' in position && false === $.isEmptyObject( position.targeting ) ) {
+                    // Slot specific targeting via the prev_scp parameter
 
-                     $.each( position.targeting, function ( key, value ) {
+                    if ( 'targeting' in position && false === $.isEmptyObject( position.targeting ) ) {
 
-                        slot.setTargeting( key, value );
+                        $.each( position.targeting, function ( key, value ) {
 
-                    } );
+                            slot.setTargeting( key, value );
 
-                }
+                        } );
 
-                definedSlots.push( slot );
+                    }
 
-            } );
+                    definedSlots.push( slot );
 
-            // Enables GPT services for defined slots.
-            googletag.enableServices();
+                } );
+
+                // Enables GPT services for defined slots.
+                googletag.enableServices();
+
+            }
 
             insertUnitTargets();
 
@@ -896,12 +901,29 @@
 
         $.each( notInserted, function ( index, slotId ) {
 
-            $context.find( '[data-ad-id="' + slotId + '"]' )
-                .addClass( 'is-initialized' )
+            var $adUnit = $context.find( '[data-ad-id="' + slotId + '"]' );
+
+            $adUnit.addClass( 'is-initialized' )
                 .append( $( '<div />', {
                     id: slotId,
                     addClass: 'ad-unit-target'
                 } ) );
+
+            if ( true === Config.get( 'usePlaceholders' ) ) {
+
+                var adInfo = Inventory.getAdInfo( slotId );
+
+                // Get the first height/width from `bidding_sizes` and set it on the ad unit
+                if ( 'object' === typeof adInfo && adInfo.bidding_sizes && adInfo.bidding_sizes[0] ) {
+                    $adLocation.find( '.ad-unit-target' )
+                        .addClass( 'placeholder' )
+                        .css({
+                            width: adInfo.bidding_sizes[0][0],
+                            height: adInfo.bidding_sizes[0][1]
+                        });
+                }
+
+            }
 
         } );
 

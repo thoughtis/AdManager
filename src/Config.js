@@ -62,6 +62,7 @@
                     '[data-ad-unit]'
                 ]
             },
+            usePlaceholders: false,                  // Insert blank placeholders instead of banner ads
             inventory: [],                           // Inventory of ad units
             targeting: []                            // Key value pairs to send with DFP request
         };
