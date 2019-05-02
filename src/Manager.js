@@ -294,7 +294,19 @@
                 } );
             }
 
-            if ( true !== Config.get( 'usePlaceholders' ) ) {
+            if ( true === Config.get( 'usePlaceholders' ) ) {
+
+                $.each( undefinedPagePositions, function( index, slotId ) {
+
+                    // Manually trigger the adUnitRendered event
+                    $.event.trigger( 'AdManager:adUnitRendered', {
+                        id:          slotId,
+                        name:        slotName
+                    } );
+
+                } );
+
+            } else { 
 
                 $.each( undefinedPagePositions, function ( index, slotId ) {
 
