@@ -298,6 +298,9 @@
 
                 $.each( undefinedPagePositions, function( index, slotId ) {
 
+                    var position = Inventory.getAdInfo( slotId ),
+                        slotName = convertSlotName( position.slot, 'dfp' );
+
                     // Manually trigger the adUnitRendered event
                     $.event.trigger( 'AdManager:adUnitRendered', {
                         id:          slotId,
