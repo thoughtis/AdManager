@@ -175,6 +175,10 @@
                 }
             } );
 
+            if ( i < Config.get( 'insertion.childOffset' ) ) {
+                valid = false;
+            }
+
             $element.attr( 'data-valid-location', valid );
 
         } );
