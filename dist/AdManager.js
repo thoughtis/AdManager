@@ -858,7 +858,8 @@
                     // Manually trigger the adUnitRendered event
                     $.event.trigger( 'AdManager:adUnitRendered', {
                         id:          slotId,
-                        name:        slotName
+                        name:        slotName,
+                        size:        position.bidding_sizes ? position.bidding_sizes[0] : []
                     } );
 
                 } );
@@ -931,7 +932,7 @@
 
                 // Get the first height/width from `bidding_sizes` and set it on the ad unit
                 if ( 'object' === typeof adInfo && adInfo.bidding_sizes && adInfo.bidding_sizes[0] ) {
-                    $adLocation.find( '.ad-unit-target' )
+                    $adUnit.find( '.ad-unit-target' )
                         .addClass( 'placeholder' )
                         .css({
                             width: adInfo.bidding_sizes[0][0],
