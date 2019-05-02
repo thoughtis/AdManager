@@ -1536,6 +1536,18 @@
 
             }
 
+        } else if ( isLastNode && this.validHeight < this.neededHeight && 0 < this.inserted.length ) {
+
+            this.exitLoop = true;
+
+            // Require less room to insert an ad at the end of the article
+            if ( this.validHeight > ( this.neededHeight / 2 ) ) {
+
+                this.$insertBefore = this.inserted[0];
+                this.locationFound = true;
+
+            }
+
         }
 
         return this.exitLoop;
